@@ -215,7 +215,7 @@ io.on('connection', (socket) => {
   });
 
   // ── Screen share & Remote control ──────────────────────────
-  ['call:screen-share','call:control-request','call:control-grant','call:control-deny','call:control-release'].forEach(evt=>{
+  ['call:screen-share','call:control-request','call:control-grant','call:control-deny','call:control-release','call:control-click','call:control-move'].forEach(evt=>{
     socket.on(evt, (data) => {
       const user = users.get(socket.id);
       const targetSid = getSocketForUser(data.to);
