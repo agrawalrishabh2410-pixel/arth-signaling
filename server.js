@@ -197,6 +197,26 @@ io.on('connection', (socket) => {
     log('CALL-HANGUP', `${user?.name} ended call with ${to}`);
   });
 
+  // ── Screen share & Remote control ──────────────────────────
+  ['call:screen-share','call:control-request','call:control-grant','call:control-deny','call:control-release'].forEach(evt=>{
+    socket.on(evt, (data) => {
+      const user = users.get(socket.id);
+      const targetSid = getSocketForUser(data.to);
+      if (targetSid && user) {
+        io.to(targetSid).emit(evt, { ...data, from: user.name });
+      }
+    });
+  });
+
+  // ── Renegotiation (switch to video mid-call) ─────────────
+  socket.on('call:renegotiate', ({ to, offer }) => {
+    const user = users.get(socket.id);
+    const targetSid = getSocketForUser(to);
+    if (targetSid && user) {
+      io.to(targetSid).emit('call:renegotiate', { from: user.name, offer });
+    }
+  });
+
   // ── Messaging ────────────────────────────────────────────────
 
   socket.on('message:send', ({ to, message, chatKey }) => {
