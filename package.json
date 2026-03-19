@@ -1,0 +1,13 @@
+{
+  "name": "arth-nova-signaling",
+  "version": "1.0.0",
+  "description": "Arth Nova ERP — Real-time signaling server for calls & messaging",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "socket.io": "^4.7.5"
+  }
+}
