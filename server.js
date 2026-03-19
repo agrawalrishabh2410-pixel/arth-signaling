@@ -100,8 +100,8 @@ io.on('connection', (socket) => {
 
   // ── Call Signaling ───────────────────────────────────────────
 
-  // Step 1: Caller sends offer
-  socket.on('call:offer', ({ to, offer, callType }) => {
+  // Step 1: Caller sends offer (also handles mid-call renegotiation)
+  socket.on('call:offer', ({ to, offer, callType, isRenegotiation }) => {
     const caller = users.get(socket.id);
     if (!caller) return;
 
@@ -112,7 +112,24 @@ io.on('connection', (socket) => {
       return;
     }
 
-    // Check if target is busy
+    // If this is a renegotiation (e.g. switch to video mid-call), skip busy check
+    if (isRenegotiation) {
+      log('RENEGOTIATE', `${caller.name} → ${to} (${callType})`);
+      io.to(targetSid).emit('call:incoming', {
+        from: caller.name,
+        offer,
+        callType: callType || 'audio',
+        isRenegotiation: true,
+        callerInfo: {
+          name: caller.name,
+          role: caller.role,
+          color: caller.color
+        }
+      });
+      return;
+    }
+
+    // Check if target is busy (only for NEW calls, not renegotiation)
     const target = users.get(targetSid);
     if (target && target.status === 'busy') {
       socket.emit('call:user-busy', { target: to });
